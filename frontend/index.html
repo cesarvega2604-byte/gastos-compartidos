@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partir - Sistema Web de Gastos Compartidos & Liquidación Inteligente</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- ================= BARRA DE NAVEGACIÓN WEB SUPERIOR ================= -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm backdrop-blur-md bg-white/95">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Logotipo -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('view-dashboard')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 font-black text-lg">
+          ⊞
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-black tracking-tight text-slate-900">Partir</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wider">Web Edition</span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Cuentas Claras & Gastos Compartidos</p>
+        </div>
+      </div>
+
+      <!-- Navegación por pestañas de escritorio (Desktop Nav Tabs) -->
+      <nav class="hidden md:flex items-center p-1 bg-slate-100 rounded-xl space-x-1 text-xs">
+        <button id="navTabDashboard" class="web-nav-tab active px-3.5 py-2 rounded-lg font-bold transition flex items-center gap-1.5" onclick="showView('view-dashboard')">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          Dashboard & Grupos
+        </button>
+        <button id="navTabGroupDetail" class="web-nav-tab px-3.5 py-2 rounded-lg font-semibold transition flex items-center gap-1.5" onclick="showView('view-group-detail')">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          Viaje Cancún 2025
+        </button>
+        <button id="navTabSettlements" class="web-nav-tab px-3.5 py-2 rounded-lg font-semibold transition flex items-center gap-1.5" onclick="showView('view-settlements')">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Liquidación Inteligente
+        </button>
+      </nav>
+
+      <!-- Acciones de Cabecera (Botón Nuevo Gasto, Perfil, Reset) -->
+      <div class="flex items-center space-x-3">
+        <!-- Botón Primario: Nuevo Gasto -->
+        <button onclick="openModalExpense()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+          <span>Nuevo Gasto</span>
+        </button>
+
+        <!-- Botón Reset Demo -->
+        <button id="btnHeaderReset" title="Restaurar datos iniciales de demostración" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl border border-slate-200 transition">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+
+        <!-- Avatar Usuario Activo -->
+        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+          <img class="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500 shadow-sm" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar Diego">
+          <div class="hidden xl:block text-left">
+            <span class="text-xs font-bold text-slate-900 block leading-tight">Tú (Diego)</span>
+            <span class="text-[10px] text-emerald-600 font-semibold block">● En línea</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+
+  <!-- ================= CONTENIDO PRINCIPAL WEB ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+
+    <!-- ============================================================== -->
+    <!-- VISTA 1: DASHBOARD GENERAL Y GRUPOS (ESCRITORIO WEB)           -->
+    <!-- ============================================================== -->
+    <div id="view-dashboard" class="space-y-8">
+
+      <!-- BANNER SUPERIOR: TU BALANCE COMPARTIDO - Cuentas Claras -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 items-center">
+          
+          <!-- Balance Neto Central -->
+          <div class="lg:col-span-6">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-400">Tu balance compartido</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                ✓ A tu favor
+              </span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white mb-2">Cuentas Claras</h1>
+            <p class="text-xs sm:text-sm text-slate-300 mb-4 max-w-md">Consolidado automático de tus gastos y deudas compartidas calculadas por algoritmo.</p>
+
+            <div class="flex items-baseline gap-2">
+              <span id="webHeroNetBalance" class="text-4xl sm:text-5xl font-black text-emerald-400">+$14,250</span>
+              <span class="text-sm font-bold text-slate-400">MXN</span>
+            </div>
+          </div>
+
+          <!-- Métricas Resumen (Te deben vs Debes) -->
+          <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <div class="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 shadow-inner">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-emerald-300 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  Te deben
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">De 3 grupos</span>
+              </div>
+              <span class="text-2xl font-black text-white block mt-1">$18,500</span>
+              <span class="text-[11px] text-slate-300 mt-1 block">3 amigos te deben transferir</span>
+            </div>
+
+            <div class="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 shadow-inner">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-rose-300 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+                  Debes
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">A 1 grupo</span>
+              </div>
+              <span class="text-2xl font-black text-white block mt-1">$4,250</span>
+              <span class="text-[11px] text-slate-300 mt-1 block">A Carlos Mendoza (Depa)</span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Acciones Rápidas del Banner -->
+        <div class="mt-6 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="showView('view-settlements')" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Saldar cuentas con Ruta Óptima
+            </button>
+            <button onclick="openModalCreateGroup()" class="px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white font-semibold text-xs sm:text-sm rounded-xl border border-white/20 transition flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Crear Nuevo Grupo
+            </button>
+          </div>
+          <span class="text-xs text-slate-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Algoritmo Voraz Min-Cash-Flow Activo
+          </span>
+        </div>
+      </div>
+
+      <!-- DISPOSICIÓN EN 2 COLUMNAS WEB (MAIN CONTENT 68% + SIDEBAR 32%) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- COLUMNA IZQUIERDA: GRUPOS ACTIVOS -->
+        <div class="lg:col-span-8 space-y-6">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                Tus grupos compartidos
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">4 activos</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">Selecciona un grupo para ver gastos, miembros y cuentas.</p>
+            </div>
+
+            <!-- Filtros de Categoría -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+              <button class="grp-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm" onclick="filterWebGroups('ALL', this)">Todos</button>
+              <button class="grp-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:text-slate-900" onclick="filterWebGroups('viaje', this)">Viajes</button>
+              <button class="grp-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:text-slate-900" onclick="filterWebGroups('hogar', this)">Casa & Roomies</button>
+              <button class="grp-filter-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:text-slate-900" onclick="filterWebGroups('salidas', this)">Salidas</button>
+            </div>
+          </div>
+
+          <!-- GRID DE TARJETAS DE GRUPO (2 COLUMNAS EN ESCRITORIO) -->
+          <div id="webGroupsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Renderizado dinámico desde app.js -->
+          </div>
+
+          <!-- Botón grande para crear grupo -->
+          <button onclick="openModalCreateGroup()" class="w-full py-4 border-2 border-dashed border-slate-300 rounded-3xl bg-white/60 hover:bg-white text-slate-600 font-bold text-sm flex items-center justify-center gap-2 transition hover:border-emerald-500 hover:text-emerald-700 shadow-sm">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Crear nuevo grupo de gastos
+          </button>
+
+        </div>
+
+        <!-- COLUMNA DERECHA: SIDEBAR DE LIQUIDACIONES Y RECORDATORIOS -->
+        <div class="lg:col-span-4 space-y-6">
+          
+          <!-- SPOTLIGHT: LIQUIDACIÓN INTELIGENTE DESTACADA -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-[10px] font-extrabold uppercase rounded-full bg-rose-50 text-rose-600 border border-rose-200">
+                Debes saldar
+              </span>
+              <span class="text-xs text-slate-400 font-semibold">Depa Roma Norte</span>
+            </div>
+
+            <div class="flex items-center gap-3.5 mb-4">
+              <img class="w-14 h-14 rounded-2xl object-cover ring-2 ring-rose-200 shadow-sm" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80" alt="Carlos Mendoza">
+              <div>
+                <h4 class="text-base font-extrabold text-slate-900">Carlos Mendoza</h4>
+                <span class="text-xs text-slate-400 block">Liquidación balance mensual</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-4 text-center">
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Monto neto optimizado</span>
+              <div class="text-2xl font-black text-rose-600 mt-0.5">$1,250.00 <span class="text-xs text-slate-400">MXN</span></div>
+              <span class="text-[11px] text-slate-500 mt-1 block">🛡️ Cubre tu parte de renta, luz e internet</span>
+            </div>
+
+            <!-- Datos Bancarios CLABE -->
+            <div class="bg-slate-100/70 p-3.5 rounded-2xl border border-slate-200/80 mb-4 text-xs">
+              <div class="flex items-center justify-between text-slate-500 text-[10px] mb-1">
+                <span>🏦 STP / BBVA</span>
+                <span class="text-emerald-700 font-bold">● Cuenta Verificada</span>
+              </div>
+              <div class="flex items-center justify-between font-mono font-bold text-slate-800 text-[11px]">
+                <span>CLABE: 6461 8015 7024 8831 09</span>
+                <button onclick="navigator.clipboard.writeText('646180157024883109'); showToast('CLABE copiada al portapapeles')" class="text-emerald-700 hover:text-emerald-800 text-[10px] font-sans font-bold flex items-center gap-0.5">
+                  📋 Copiar
+                </button>
+              </div>
+            </div>
+
+            <!-- Botón de Pago Principal -->
+            <button onclick="executeSpotlightPayment()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition active:scale-95 mb-2">
+              <span>📱</span> Pagar por SPEI / Transferencia
+            </button>
+
+            <button onclick="executeCashPayment()" class="w-full py-2 text-center text-xs text-slate-500 hover:text-slate-800 font-semibold transition">
+              💵 Pagué en efectivo
+            </button>
+          </div>
+
+          <!-- TRANSFERENCIAS RECOMENDADAS PENDIENTES -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-extrabold text-slate-900">Transferencias recomendadas</h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">3 pendientes</span>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Mateo Silva -->
+              <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <img class="w-9 h-9 rounded-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Mateo">
+                  <div>
+                    <span class="text-xs font-bold text-slate-900 block">Mateo Silva <span class="text-emerald-600">→ A TI</span></span>
+                    <span class="text-[10px] text-slate-400">Viaje Valle de Bravo</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-black text-emerald-600 block">$5,200.00</span>
+                  <button onclick="showToast('Recordatorio enviado a Mateo')" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded mt-0.5">
+                    🔔 Recordar
+                  </button>
+                </div>
+              </div>
+
+              <!-- Valeria Gómez -->
+              <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <img class="w-9 h-9 rounded-full object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80" alt="Valeria">
+                  <div>
+                    <span class="text-xs font-bold text-slate-900 block">Valeria Gómez <span class="text-emerald-600">→ A TI</span></span>
+                    <span class="text-[10px] text-slate-400">Cena Cumpleaños</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-black text-emerald-600 block">$3,200.00</span>
+                  <button onclick="showToast('Enlace de cobro WhatsApp preparado')" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded mt-0.5">
+                    💬 WhatsApp
+                  </button>
+                </div>
+              </div>
+
+              <!-- Diego a Sofia -->
+              <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
+                <div>
+                  <span class="text-xs font-bold text-slate-900 block">Diego T. → Sofía R.</span>
+                  <span class="text-[10px] text-slate-400">Cierra balance general • Paso 3</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-800 block">$2,100.00</span>
+                  <span class="text-[9px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Pendiente</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- VISTA 2: DETALLE DE GRUPO (EJ. VIAJE CANCÚN 2025)               -->
+    <!-- ============================================================== -->
+    <div id="view-group-detail" class="space-y-8 hidden">
+      
+      <!-- Barra superior con botón volver -->
+      <div class="flex items-center justify-between">
+        <button onclick="showView('view-dashboard')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Volver a todos los grupos
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openModalExpense()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            Añadir Gasto a este Grupo
+          </button>
+        </div>
+      </div>
+
+      <!-- HERO BANNER DEL GRUPO -->
+      <div class="relative rounded-3xl overflow-hidden shadow-xl text-white min-h-[220px] flex flex-col justify-between p-6 sm:p-8 bg-slate-900">
+        <img id="webGroupBannerImg" class="absolute inset-0 w-full h-full object-cover opacity-50" src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=1200&q=80" alt="Banner Cancún">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+
+        <div class="relative z-10 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 text-xs font-bold rounded-full bg-white/20 backdrop-blur-md border border-white/20">
+              🏖️ Viaje vacacional
+            </span>
+            <span id="webGroupMemberCount" class="px-3 py-1 text-xs font-bold rounded-full bg-white/20 backdrop-blur-md border border-white/20">
+              👥 5 integrantes
+            </span>
+          </div>
+
+          <!-- Tu saldo en este grupo específico -->
+          <div class="bg-white/15 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 text-right">
+            <span class="text-[10px] uppercase font-bold text-emerald-300 block">Tu saldo en el grupo</span>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl font-black text-emerald-400">+$8,400</span>
+              <span class="text-xs text-white/70 font-semibold">MXN (Te deben)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative z-10 mt-6">
+          <h1 id="webGroupDetailName" class="text-3xl sm:text-4xl font-black tracking-tight">Viaje Cancún 2025</h1>
+          <p id="webGroupTotalSpent" class="text-sm text-slate-300 font-medium mt-1">Gasto total acumulado: $42,600 MXN en 14 transacciones</p>
+        </div>
+      </div>
+
+      <!-- DISPOSICIÓN EN 2 COLUMNAS (HISTORIAL DE GASTOS 65% + QUIÉN DEBE A QUIÉN 35%) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- COLUMNA IZQUIERDA: HISTORIAL DE GASTOS -->
+        <div class="lg:col-span-8 space-y-6">
+          
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-extrabold text-slate-900">Historial cronológico de gastos</h2>
+            <span class="text-xs text-slate-400 font-semibold">Orden: Recientes</span>
+          </div>
+
+          <!-- SECCIÓN: HOY -->
+          <div class="space-y-3">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Hoy</span>
+
+            <!-- Gasto 1: Mariscos -->
+            <div class="web-card bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-2xl shadow-inner">
+                  🍽️
+                </div>
+                <div>
+                  <h4 class="text-sm sm:text-base font-bold text-slate-900">Cena Mariscos El Farito</h4>
+                  <span class="text-xs text-slate-500">Pagó <strong>Sofía Ramos</strong> • $3,200 en total</span>
+                  <div class="mt-1 text-[11px] text-slate-400">Dividido equitativamente entre los 5 amigos ($640 c/u)</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-rose-50 text-rose-600 uppercase">Tu parte</span>
+                <span class="text-sm sm:text-base font-black text-rose-600 block mt-0.5">-$640 MXN</span>
+              </div>
+            </div>
+
+            <!-- Gasto 2: Parque Xcaret -->
+            <div class="web-card bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shadow-inner">
+                  🎫
+                </div>
+                <div>
+                  <h4 class="text-sm sm:text-base font-bold text-slate-900">Entradas Parque Xcaret Plus</h4>
+                  <span class="text-xs text-slate-500">Pagaste <strong>tú (Diego)</strong> • $12,500 en total</span>
+                  <div class="mt-1 text-[11px] text-slate-400">Incluye buffet mexicano y lockers</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-emerald-50 text-emerald-700 uppercase">Te deben</span>
+                <span class="text-sm sm:text-base font-black text-emerald-600 block mt-0.5">+$10,000 MXN</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN: AYER -->
+          <div class="space-y-3 pt-2">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Ayer</span>
+
+            <!-- Gasto 3: Renta Auto -->
+            <div class="web-card bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center text-2xl shadow-inner">
+                  🚗
+                </div>
+                <div>
+                  <h4 class="text-sm sm:text-base font-bold text-slate-900">Renta de Auto & Gasolina</h4>
+                  <span class="text-xs text-slate-500">Pagó <strong>Mateo López</strong> • $4,800 en total</span>
+                  <div class="mt-1 text-[11px] text-slate-400">Camioneta familiar Hertz 4 días</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-rose-50 text-rose-600 uppercase">Tu parte</span>
+                <span class="text-sm sm:text-base font-black text-rose-600 block mt-0.5">-$960 MXN</span>
+              </div>
+            </div>
+
+            <!-- Gasto 4: Supermercado -->
+            <div class="web-card bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shadow-inner">
+                  🛒
+                </div>
+                <div>
+                  <h4 class="text-sm sm:text-base font-bold text-slate-900">Supermercado y snacks</h4>
+                  <span class="text-xs text-slate-500">Pagaste <strong>tú (Diego)</strong> • $3,100 en total</span>
+                  <div class="mt-1 text-[11px] text-slate-400">Bebidas, víveres y botanas</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-emerald-50 text-emerald-700 uppercase">Te deben</span>
+                <span class="text-sm sm:text-base font-black text-emerald-600 block mt-0.5">+$2,480 MXN</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUMNA DERECHA: QUIÉN DEBE A QUIÉN Y PARTICIPANTES -->
+        <div class="lg:col-span-4 space-y-6">
+          
+          <!-- SECCIÓN: QUIÉN DEBE A QUIÉN -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+                <span>⚡</span> Quién debe a quién
+              </h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">3 pagos totales</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">Simplificación activa: mínimo número de transferencias para saldar todo el grupo.</p>
+
+            <div class="space-y-3">
+              <!-- Item 1: Mateo -->
+              <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <img class="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Mateo">
+                  <div>
+                    <div class="text-xs font-bold text-slate-900">Mateo <span class="text-slate-400 font-normal">te debe</span></div>
+                    <div class="text-sm font-black text-emerald-600">$5,200 <span class="text-[10px] text-slate-400">MXN</span></div>
+                  </div>
+                </div>
+                <button onclick="showToast('Recordatorio enviado a Mateo por WhatsApp')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+                  ▶ Recordar
+                </button>
+              </div>
+
+              <!-- Item 2: Valeria -->
+              <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <img class="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80" alt="Valeria">
+                  <div>
+                    <div class="text-xs font-bold text-slate-900">Valeria <span class="text-slate-400 font-normal">te debe</span></div>
+                    <div class="text-sm font-black text-emerald-600">$3,200 <span class="text-[10px] text-slate-400">MXN</span></div>
+                  </div>
+                </div>
+                <button onclick="showToast('Notificación enviada a Valeria')" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl transition">
+                  🔔 Recordar
+                </button>
+              </div>
+
+              <!-- Item 3: Entre ellos -->
+              <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <div class="flex -space-x-1">
+                    <span class="w-6 h-6 rounded-full bg-slate-300 text-slate-700 font-bold text-[10px] flex items-center justify-center">D</span>
+                    <span class="w-6 h-6 rounded-full bg-slate-400 text-white font-bold text-[10px] flex items-center justify-center">S</span>
+                  </div>
+                  <span class="text-xs text-slate-600">Diego debe a Sofía <strong class="text-slate-900">$2,100 MXN</strong></span>
+                </div>
+                <span class="text-[10px] font-semibold text-slate-400 bg-slate-200 px-2 py-0.5 rounded-md">Entre ellos</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- LISTA DE PARTICIPANTES -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+            <h3 class="text-sm font-extrabold text-slate-900 mb-3">Integrantes del viaje (5)</h3>
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <img class="w-7 h-7 rounded-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Diego">
+                  <span class="font-bold text-slate-800">Tú (Diego)</span>
+                </div>
+                <span class="text-emerald-600 font-extrabold">+$8,400</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <img class="w-7 h-7 rounded-full object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" alt="Sofia">
+                  <span class="font-bold text-slate-800">Sofía Ramos</span>
+                </div>
+                <span class="text-slate-500 font-bold">+$2,100</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <img class="w-7 h-7 rounded-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Mateo">
+                  <span class="font-bold text-slate-800">Mateo López</span>
+                </div>
+                <span class="text-rose-600 font-extrabold">-$5,200</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <img class="w-7 h-7 rounded-full object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80" alt="Valeria">
+                  <span class="font-bold text-slate-800">Valeria Gómez</span>
+                </div>
+                <span class="text-rose-600 font-extrabold">-$3,200</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <img class="w-7 h-7 rounded-full object-cover" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" alt="Carlos">
+                  <span class="font-bold text-slate-800">Carlos Ruiz</span>
+                </div>
+                <span class="text-slate-500 font-bold">-$2,100</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- VISTA 3: LIQUIDACIÓN INTELIGENTE (PANTALLA COMPLETA WEB)         -->
+    <!-- ============================================================== -->
+    <div id="view-settlements" class="space-y-8 hidden">
+      
+      <!-- Encabezado de la Sección -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span class="px-2.5 py-1 text-[10px] font-extrabold tracking-widest uppercase rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+            ⚡ Algoritmo de ruta óptima
+          </span>
+          <h1 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Liquidación Inteligente</h1>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Minimizamos las transferencias cruzadas del grupo para que todos queden en $0 con la menor cantidad de pasos.</p>
+        </div>
+
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3">
+          <div class="text-xs text-emerald-900 leading-tight">
+            <strong>14 gastos cruzados simplificados</strong><br>
+            <span class="text-emerald-700">Se resuelven con solo 3 transferencias netas</span>
+          </div>
+          <span class="px-2.5 py-1.5 bg-emerald-600 text-white font-black text-xs rounded-xl shadow-sm">
+            -78% pagos
+          </span>
+        </div>
+      </div>
+
+      <!-- Grid de Cobro y Transferencias -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Tarjeta Principal de Pago SPEI (Columna 6) -->
+        <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 text-xs font-extrabold uppercase rounded-full bg-rose-50 text-rose-600 border border-rose-200">
+              Debes saldar
+            </span>
+            <span class="text-xs text-slate-400 font-semibold">Grupo Depa Roma Norte</span>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <img class="w-16 h-16 rounded-2xl object-cover ring-2 ring-rose-300 shadow-md" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80" alt="Carlos Mendoza">
+            <div>
+              <h3 class="text-xl font-extrabold text-slate-900">Carlos Mendoza</h3>
+              <span class="text-xs text-slate-400">Liquidación balance mensual del departamento</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center">
+            <span class="text-xs font-extrabold uppercase text-slate-400 block">Monto neto optimizado a transferir</span>
+            <div class="text-3xl font-black text-rose-600 mt-1">$1,250.00 <span class="text-sm text-slate-400">MXN</span></div>
+            <span class="text-xs text-slate-500 mt-1.5 block">🛡️ Cubre tu parte de renta, luz e internet</span>
+          </div>
+
+          <!-- Datos Bancarios CLABE -->
+          <div class="bg-slate-100/80 p-4 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+            <div class="flex items-center justify-between text-slate-500 font-semibold text-xs">
+              <span>🏦 Banco: STP / BBVA México</span>
+              <span class="text-emerald-700 font-bold">● Cuenta Verificada</span>
+            </div>
+            <div class="flex items-center justify-between font-mono font-bold text-slate-900 text-sm">
+              <span>CLABE: 6461 8015 7024 8831 09</span>
+              <button onclick="navigator.clipboard.writeText('646180157024883109'); showToast('CLABE interbancaria copiada al portapapeles')" class="text-emerald-700 hover:text-emerald-800 text-xs font-sans font-bold flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-sm">
+                📋 Copiar
+              </button>
+            </div>
+          </div>
+
+          <button onclick="executeSpotlightPayment()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition active:scale-95">
+            <span>📱</span> Pagar por SPEI / Transferencia Bancaria
+          </button>
+
+          <div class="flex items-center justify-center gap-4 text-xs text-slate-500 pt-2">
+            <button onclick="executeCashPayment()" class="hover:text-slate-900 font-semibold flex items-center gap-1">
+              <span>💵</span> Registrar pago en efectivo
+            </button>
+            <span>•</span>
+            <button onclick="showToast('Enlace de cobro generado')" class="hover:text-slate-900 font-semibold flex items-center gap-1">
+              <span>🔗</span> Compartir comprobante
+            </button>
+          </div>
+        </div>
+
+        <!-- Transferencias Recomendadas del Grupo (Columna 6) -->
+        <div class="lg:col-span-6 space-y-4">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <h3 class="text-base font-extrabold text-slate-900 mb-1">Transferencias recomendadas</h3>
+            <p class="text-xs text-slate-400 mb-4">Pagos que saldan el 100% de las obligaciones de todos los miembros.</p>
+
+            <div class="space-y-3">
+              <!-- Item 1 -->
+              <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <img class="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Mateo">
+                  <div>
+                    <span class="text-sm font-bold text-slate-900 block">Mateo Silva <span class="text-emerald-600">→ A TI (Diego)</span></span>
+                    <span class="text-xs text-slate-400">Grupo: Viaje Valle de Bravo</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-black text-emerald-600 block">$5,200.00 MXN</span>
+                  <button onclick="showToast('Recordatorio enviado a Mateo por WhatsApp')" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-lg mt-1">
+                    🔔 Recordatorio
+                  </button>
+                </div>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <img class="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80" alt="Valeria">
+                  <div>
+                    <span class="text-sm font-bold text-slate-900 block">Valeria Gómez <span class="text-emerald-600">→ A TI (Diego)</span></span>
+                    <span class="text-xs text-slate-400">Grupo: Cena Cumpleaños</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-black text-emerald-600 block">$3,200.00 MXN</span>
+                  <button onclick="showToast('Enlace WhatsApp generado')" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-lg mt-1">
+                    💬 Cobrar WhatsApp
+                  </button>
+                </div>
+              </div>
+
+              <!-- Item 3 -->
+              <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <span class="text-sm font-bold text-slate-900 block">Diego T. → Sofía R.</span>
+                  <span class="text-xs text-slate-400">Cierra balance general • Paso final 3 de 3</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-bold text-slate-800 block">$2,100.00 MXN</span>
+                  <span class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Pendiente</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORIAL DE CUENTAS EN CERO -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+            <h3 class="text-xs font-extrabold uppercase text-slate-400 tracking-wider mb-3">Historial de cuentas saldadas</h3>
+            <div class="space-y-2.5 text-xs">
+              <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold">↗</span>
+                  <div>
+                    <span class="font-bold text-slate-900 block">Pagaste a Carlos M.</span>
+                    <span class="text-[10px] text-slate-400">Ayer a las 18:30 • Vía SPEI BBVA</span>
+                  </div>
+                </div>
+                <span class="font-black text-slate-900">$850.00 <span class="text-emerald-600 font-bold text-[10px]">Saldado ✓</span></span>
+              </div>
+
+              <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">↓</span>
+                  <div>
+                    <span class="font-bold text-slate-900 block">Sofía R. te transfirió</span>
+                    <span class="text-[10px] text-slate-400">Hace 3 días • SPEI Santander</span>
+                  </div>
+                </div>
+                <span class="font-black text-emerald-600">+$1,400.00 <span class="text-emerald-700 font-bold text-[10px]">Confirmado ✓</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ================= PIE DE PÁGINA WEB ================= -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>
+        <span class="font-bold text-slate-800">Partir Web</span> • Sistema de Gastos Compartidos & Liquidación Inteligente
+      </div>
+      <div class="flex items-center gap-4">
+        <span>SENA - Análisis y Desarrollo de Software (ADSO)</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+        <span class="text-emerald-700 font-semibold">API REST: En Línea</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ================= MODALES DE ESCRITORIO ================= -->
+
+  <!-- MODAL WEB: NUEVO GASTO -->
+  <div id="modalWebExpense" class="web-modal-backdrop fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="text-xl font-extrabold text-slate-900">Registrar Nuevo Gasto</h3>
+          <p class="text-xs text-slate-500">Ingresa el monto y define la división entre amigos.</p>
+        </div>
+        <button onclick="closeModalExpense()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-4 mt-5">
+        
+        <!-- Grupo Activo -->
+        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🏖️</span>
+            <div>
+              <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Grupo Activo</span>
+              <span class="text-xs font-bold text-slate-900">Viaje Cancún 2025</span>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 bg-white text-slate-700 text-xs font-semibold rounded-lg shadow-sm">
+            5 integrantes
+          </span>
+        </div>
+
+        <!-- Monto -->
+        <div class="text-center py-2 bg-slate-50 rounded-2xl p-4 border border-slate-100">
+          <span class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block mb-1">Monto a repartir</span>
+          <div class="flex items-center justify-center gap-1">
+            <span class="text-2xl font-black text-slate-400">$</span>
+            <input type="number" id="webExpenseAmount" value="1850" class="text-3xl font-black text-slate-900 w-44 text-center focus:outline-none border-b-2 border-emerald-500 bg-transparent">
+          </div>
+          <span class="text-xs font-semibold text-slate-400 block mt-1">● Pesos Mexicanos (MXN)</span>
+        </div>
+
+        <!-- Concepto -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Descripción del gasto *</label>
+          <input type="text" id="webExpenseDesc" value="Cena de mariscos y tacos" placeholder="Ej. Cena en restaurante, Uber, Boletos..." class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <!-- Categorías -->
+        <div class="flex items-center gap-2">
+          <button class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold">🍽️ Comida</button>
+          <button class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold">🚗 Transporte</button>
+          <button class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold">🏨 Alojamiento</button>
+        </div>
+
+        <!-- Pagador -->
+        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <img class="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Tú">
+            <div>
+              <span class="text-xs font-bold text-slate-900 block">Tú (Diego)</span>
+              <span class="text-[10px] text-slate-400">Pagaste el monto total de $1,850.00</span>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-lg">
+            Pagador
+          </span>
+        </div>
+
+        <!-- Modo de División -->
+        <div class="pt-2">
+          <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between text-xs mb-3">
+            <span class="text-emerald-800 font-semibold flex items-center gap-1.5">
+              <span>👥</span> Dividido en 5 personas • <strong class="font-extrabold text-emerald-950">$370.00 / persona</strong>
+            </span>
+            <span class="text-[11px] font-bold text-emerald-700">Modo Equitativo</span>
+          </div>
+
+          <div class="space-y-2 max-h-40 overflow-y-auto pr-1">
+            <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl text-xs">
+              <span class="font-bold text-slate-800">Tú (Diego) • Cuota: $370.00</span>
+              <input type="checkbox" checked class="w-4 h-4 text-emerald-600 rounded">
+            </div>
+            <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl text-xs">
+              <span class="font-bold text-slate-800">Sofía Ramos • Debe: $370.00</span>
+              <input type="checkbox" checked class="w-4 h-4 text-emerald-600 rounded">
+            </div>
+            <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl text-xs">
+              <span class="font-bold text-slate-800">Mateo López • Debe: $370.00</span>
+              <input type="checkbox" checked class="w-4 h-4 text-emerald-600 rounded">
+            </div>
+            <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl text-xs">
+              <span class="font-bold text-slate-800">Valeria Gómez • Debe: $370.00</span>
+              <input type="checkbox" checked class="w-4 h-4 text-emerald-600 rounded">
+            </div>
+            <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl text-xs">
+              <span class="font-bold text-slate-800">Carlos Ruiz • Debe: $370.00</span>
+              <input type="checkbox" checked class="w-4 h-4 text-emerald-600 rounded">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          <button onclick="closeModalExpense()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800">Cancelar</button>
+          <button onclick="saveWebExpense()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition">
+            Guardar Gasto ($1,850.00)
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIONES -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- LÓGICA DE APLICACIÓN -->
+  <script src="app.js"></script>
+</body>
+</html>

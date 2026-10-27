@@ -1,0 +1,29 @@
+{
+  "name": "splitwise-sena-backend",
+  "version": "1.0.0",
+  "description": "Backend REST API para App de Gastos Compartidos (Splitwise Simplificado) - SENA ADSO",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node tests/debtSimplification.test.js",
+    "seed": "node -e \"require('./src/models/databaseAdapter').resetToSeedData().then(() => console.log('✅ Datos de demostración cargados exitosamente.'))\""
+  },
+  "keywords": [
+    "splitwise",
+    "sena",
+    "adso",
+    "expenses",
+    "debt-simplification",
+    "express",
+    "mongodb"
+  ],
+  "author": "Aprendiz SENA - Análisis y Desarrollo de Software",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "mongoose": "^9.11.4"
+  }
+}

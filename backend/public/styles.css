@@ -1,0 +1,83 @@
+/* =========================================================
+   ESTILOS WEB RESPONSIVOS - PARTIR / SPLITSENA (WEB DASHBOARD)
+   ========================================================= */
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Transiciones suaves de tarjetas web */
+.web-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.web-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.06), 0 4px 8px -2px rgba(0, 0, 0, 0.02);
+  border-color: #cbd5e1;
+}
+
+/* Estilos de pestañas de navegación web */
+.web-nav-tab.active {
+  background-color: #10b981;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.35);
+}
+
+.web-nav-tab:not(.active) {
+  color: #64748b;
+}
+
+.web-nav-tab:not(.active):hover {
+  color: #0f172a;
+  background-color: #f1f5f9;
+}
+
+/* Modales Web centrados y con animación limpia */
+.web-modal-backdrop:not(.hidden) {
+  animation: modalFadeIn 0.15s ease-out;
+}
+
+.web-modal-backdrop:not(.hidden) > div {
+  animation: modalSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Scrollbars web discretas */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

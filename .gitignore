@@ -1,0 +1,12 @@
+# Git Ignore
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db-journal
+node_modules/
+.env
+*.log
+.DS_Store
+*.tmp
